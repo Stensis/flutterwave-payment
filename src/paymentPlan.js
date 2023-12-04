@@ -1,95 +1,87 @@
 import React, { useState } from "react";
 import { FlutterWaveButton, closePaymentModal } from "flutterwave-react-v3";
 
-const CreatePaymentPlan = () => {
+const LoanRepayment = () => {
   const [paymentPlan, setPaymentPlan] = useState(null);
+  const [paymentSuccessful, setPaymentSuccessful] = useState(false);
 
-  const generateDummyPaymentPlan = () => {
-    const dummyPlan = {
-      id: 20,
-      name: "Testing plan",
-      amount: 5000,
-      interval: "monthly",
-      duration: 12,
-      status: "active",
-      currency: "KES",
-    };
-
-    return dummyPlan;
-  };
-
-  const handleCreatePaymentPlan = async () => {
+  // Function to create a payment plan
+  const createPaymentPlan = async () => {
     try {
-      // Simulate creating a payment plan
-      const createdPlan = generateDummyPaymentPlan();
-      setPaymentPlan(createdPlan);
+      const dummyResponse = {
+        status: "success",
+        message: "Payment plan created",
+        data: {
+          id: 12345,
+          name: "Loan Repayment Plan",
+          amount: 3300,
+          interval: "monthly",
+          duration: 3,
+          status: "active",
+          currency: "KES",
+          plan_token: "dummy_plan_token",
+          created_at: new Date().toISOString(),
+        },
+      };
+
+      setPaymentPlan(dummyResponse.data);
     } catch (error) {
       console.error("Error creating payment plan", error);
     }
   };
+  console.log("Public Key:", process.env.REACT_APP_PUBLIC_KEY);
 
   const handlePaymentButtonClick = () => {
     if (paymentPlan) {
-      const confirmed = window.confirm(
-        `Do you want to pay ${paymentPlan.amount} ${paymentPlan.currency} to Flutterwave?`
+      return (
+        <FlutterWaveButton
+          public_key={process.env.REACT_APP_PUBLIC_KEY} 
+          tx_ref={Date.now()}
+          amount={paymentPlan.amount}
+          currency={paymentPlan.currency}
+          payment_options="card,mobilemoney"
+          customer={{
+            email: "irenenjuguna98@gmail.com",
+            phone_number: "+254791798403",
+            name: "User Irene",
+          }}
+          customizations={{
+            title: "Loan Repayment",
+            description: "Monthly repayment for the loan",
+            logo: "YOUR_LOGO_URL",
+          }}
+          payment_plan={paymentPlan.plan_token}
+          callback={(response) => {
+            console.log(response);
+            setPaymentSuccessful(true);
+            closePaymentModal();
+          }}
+          onClose={() => {}}
+        />
       );
-
-      if (confirmed) {
-        // For recurring payments, set up the subscription on the server
-        // and handle it securely using server-side logic.
-        // You can create an endpoint on your server to initiate the subscription.
-
-        // Example: initiateSubscription(paymentPlan.id);
-
-        // For simplicity, let's assume initiateSubscription is a function that initiates the subscription.
-
-        // Now, return the FlutterwaveButton component directly with a bigger button style
-        return (
-          <FlutterWaveButton
-            public_key="FLWPUBK_TEST-d6c75c7c10b49db084e51fc3c0eb6f0e-X"
-            tx_ref={Date.now()}
-            amount={paymentPlan.amount}
-            currency={paymentPlan.currency}
-            payment_options="card,mobilemoney"
-            customer={{
-              email: "irenenjuguna98@gmail.com",
-              phone_number: "+254791798403",
-              name: "Irene",
-            }}
-            customizations={{
-              title: "My learning experience",
-              description: "Payment for testing purposes",
-              logo: "https://st2.depositphotos.com/4403291/7418/v/450/depositphotos_74189661-stock-illustration-online-shop-log.jpg",
-            }}
-            payment_plan={paymentPlan.id}
-            callback={(response) => {
-              console.log(response);
-              closePaymentModal();
-            }}
-            onClose={() => {}}            
-          />
-        );
-      }
     }
   };
 
   return (
     <div>
-      <button onClick={handleCreatePaymentPlan}>Create Payment Plan</button>
+      <button onClick={createPaymentPlan}>Payment Plan</button>
       {paymentPlan && (
         <div>
           <p>Payment Plan ID: {paymentPlan.id}</p>
           <p>
             Amount to be paid: {paymentPlan.amount} {paymentPlan.currency}
           </p>
-          <p>Click the button to confirm payment</p>
-         
+          <p>Payment will be automatically deducted monthly</p>
           {handlePaymentButtonClick()}
-         
+          {paymentSuccessful && (
+            <p style={{ color: "green" }}>
+              Payment successful! Money deducted from the account.
+            </p>
+          )}
         </div>
       )}
     </div>
   );
 };
 
-export default CreatePaymentPlan;
+export default LoanRepayment;

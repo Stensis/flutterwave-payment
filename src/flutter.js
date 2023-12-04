@@ -1,4 +1,3 @@
-// App.js
 import React from "react";
 import { FlutterWaveButton, closePaymentModal } from "flutterwave-react-v3";
 
@@ -7,10 +6,8 @@ const phone_number = "+254791798403";
 const name = "Irene";
 
 const Flutter = () => {
- 
-
   const config = {
-    public_key: "FLWPUBK_TEST-d6c75c7c10b49db084e51fc3c0eb6f0e-X",
+    public_key: process.env.REACT_APP_PUBLIC_KEY, 
     tx_ref: Date.now(),
     amount: 100,
     currency: "KES",
@@ -40,7 +37,6 @@ const Flutter = () => {
   return (
     <div className="App">
       <h1>
-     
         <FlutterWaveButton {...fwConfig} />
       </h1>
     </div>
